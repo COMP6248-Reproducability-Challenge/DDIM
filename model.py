@@ -57,6 +57,7 @@ class DenoisingDiffusionNet(nn.Module):
         
     def sample(self,device,eta = 0):
         with torch.no_grad():
+            self.denoise_model.eval()
             x = torch.randn(1,3,32,32,device=device)
             seq = range(0, self.num_timesteps, 1)
 
@@ -70,6 +71,8 @@ class DenoisingDiffusionNet(nn.Module):
 
                 xt = xs[-1].to(device)
                 et = self.denoise_model(xt, t)
+                et = torch.split(et, 3, dim=1)[0]
+
 
                 x0_t =  extract(1.0 / self.sqrt_alphas_bar, t, xt.shape) * xt - \
                     extract(self.sqrt_recip_minus_one_alphas_bar, t, xt.shape) * et         
